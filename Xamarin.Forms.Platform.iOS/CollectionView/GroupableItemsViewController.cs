@@ -207,47 +207,6 @@ namespace Xamarin.Forms.Platform.iOS
 			return span;
 		}
 
-		internal UIEdgeInsets GetInsetForSection(ItemsViewLayout itemsViewLayout,
-			UICollectionView collectionView, nint section)
-		{
-			var uIEdgeInsets = ItemsViewLayout.GetInsetForSection(collectionView, itemsViewLayout, section);
-
-			if (!ItemsView.IsGrouped)
-			{
-				return uIEdgeInsets;
-			}
-
-			// If we're grouping, we'll need to inset the sections to maintain the item spacing between the 
-			// groups and/or their group headers/footers
-
-			var itemsLayout = ItemsView.ItemsLayout;
-			var scrollDirection = itemsViewLayout.ScrollDirection;
-			nfloat lineSpacing = itemsViewLayout.GetMinimumLineSpacingForSection(collectionView, itemsViewLayout, section);
-
-			if (itemsLayout is GridItemsLayout)
-			{
-				nfloat itemSpacing = itemsViewLayout.GetMinimumInteritemSpacingForSection(collectionView, itemsViewLayout, section);
-
-				if (scrollDirection == UICollectionViewScrollDirection.Horizontal)
-				{
-					return new UIEdgeInsets(itemSpacing + uIEdgeInsets.Top, lineSpacing + uIEdgeInsets.Left,
-						uIEdgeInsets.Bottom, uIEdgeInsets.Right);
-				}
-
-				return new UIEdgeInsets(lineSpacing + uIEdgeInsets.Top, itemSpacing + uIEdgeInsets.Left,
-					uIEdgeInsets.Bottom, uIEdgeInsets.Right);
-			}
-
-			if (scrollDirection == UICollectionViewScrollDirection.Horizontal)
-			{
-				return new UIEdgeInsets(uIEdgeInsets.Top, lineSpacing + uIEdgeInsets.Left,
-					uIEdgeInsets.Bottom, uIEdgeInsets.Right);
-			}
-
-			return new UIEdgeInsets(lineSpacing + uIEdgeInsets.Top, uIEdgeInsets.Left,
-				uIEdgeInsets.Bottom, uIEdgeInsets.Right);
-		}
-
 		// These measurement methods are only necessary for iOS 10 and lower
 		CGSize MeasureTemplatedSupplementaryCell(NSString elementKind, nint section, NSString reuseId)
 		{
