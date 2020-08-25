@@ -11,6 +11,7 @@ namespace Xamarin.Forms.Platform.iOS
 {
 	public class PageRenderer : UIViewController, IVisualElementRenderer, IEffectControlProvider, IAccessibilityElementsController, IShellContentInsetObserver
 	{
+		bool _appeared;
 		bool _disposed;
 		EventTracker _events;
 		VisualElementPackager _packager;
@@ -189,7 +190,7 @@ namespace Xamarin.Forms.Platform.iOS
 		{
 			base.ViewDidAppear(animated);
 
-			if (_disposed)
+			if (_appeared || _disposed)
 				return;
 
 			UpdateStatusBarPrefersHidden();
@@ -200,19 +201,21 @@ namespace Xamarin.Forms.Platform.iOS
 			if (Element.Parent is CarouselPage)
 				return;
 
-			_pageLifecycleManager?.HandlePageAppearing();
+			_appeared = true;
+			_pageLifecycleManager?.HandlePageAppearing();			
 		}
 
 		public override void ViewDidDisappear(bool animated)
 		{
 			base.ViewDidDisappear(animated);
 
-			if (_disposed)
+			if (!_appeared || _disposed)
 				return;
 
 			if (Element.Parent is CarouselPage)
 				return;
 
+			_appeared = false;
 			_pageLifecycleManager?.HandlePageDisappearing();
 		}
 
@@ -269,6 +272,7 @@ namespace Xamarin.Forms.Platform.iOS
 				Element.PropertyChanged -= OnHandlePropertyChanged;
 				Platform.SetRenderer(Element, null);
 
+				_appeared = false;
 				_pageLifecycleManager?.Dispose();
 				_pageLifecycleManager = null;
 
