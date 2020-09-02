@@ -75,7 +75,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 		public override UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath)
 		{
-			// When retrieving a non-prototype cell, we bind it to its data context.
+			// When retrieving a cell, we *must* set its binding context.
 			return GetCell(collectionView, indexPath, true);
 		}
 
@@ -194,7 +194,7 @@ namespace Xamarin.Forms.Platform.iOS
 			return ItemsSource.GroupCount;
 		}
 
-		private UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath, bool bind)
+		private UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath, bool setBindingContext)
 		{
 			var cell = collectionView.DequeueReusableCell(DetermineCellReuseId(), indexPath) as UICollectionViewCell;
 
@@ -204,7 +204,7 @@ namespace Xamarin.Forms.Platform.iOS
 					UpdateDefaultCell(defaultCell, indexPath);
 					break;
 				case TemplatedCell templatedCell:
-					UpdateTemplatedCell(templatedCell, indexPath, bind);
+					UpdateTemplatedCell(templatedCell, indexPath, setBindingContext);
 					break;
 			}
 
@@ -221,11 +221,11 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
-		protected virtual void UpdateTemplatedCell(TemplatedCell cell, NSIndexPath indexPath, bool bind)
+		protected virtual void UpdateTemplatedCell(TemplatedCell cell, NSIndexPath indexPath, bool setBindingContext)
 		{
 			cell.ContentSizeChanged -= CellContentSizeChanged;
 
-			cell.Bind(ItemsView.ItemTemplate, ItemsView, bind ? ItemsSource[indexPath] : default);
+			cell.Bind(ItemsView.ItemTemplate, ItemsView, ItemsSource[indexPath], setBindingContext);
 
 			cell.ContentSizeChanged += CellContentSizeChanged;
 
@@ -289,7 +289,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 			var indexPath = NSIndexPath.Create(group, 0);
 
-			// When retrieving a prototype cell, we *do not wish* to bind it to its data context.
+			// When retrieving a prototype cell, we *do not wish* to set its binding context.
 			// Why? This is for consistency with the behavior on the other platforms.
 			// Previously, this meant the first cell displayed was bound twice in error.
 			return GetCell(CollectionView, indexPath, false);

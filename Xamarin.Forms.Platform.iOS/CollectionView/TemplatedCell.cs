@@ -65,7 +65,7 @@ namespace Xamarin.Forms.Platform.iOS
 			return preferredAttributes;
 		}
 
-		public void Bind(DataTemplate template, ItemsView itemsView, object bindingContext = null)
+		public void Bind(DataTemplate template, ItemsView itemsView, object bindingContext, bool setBindingContext = true)
 		{
 			var oldElement = VisualElementRenderer?.Element;
 
@@ -87,7 +87,7 @@ namespace Xamarin.Forms.Platform.iOS
 				var view = itemTemplate.CreateContent() as View;
 
 				// Set the binding context _before_ we create the renderer; that way, it's available during OnElementChanged
-				if (bindingContext != null)
+				if (setBindingContext && bindingContext != null)
 				{
 					view.BindingContext = bindingContext;
 				}
@@ -106,7 +106,7 @@ namespace Xamarin.Forms.Platform.iOS
 				// Same template, different data
 				var currentElement = VisualElementRenderer?.Element;
 
-				if (currentElement != null && bindingContext != null)
+				if (currentElement != null && setBindingContext && bindingContext != null)
 				{
 					currentElement.BindingContext = bindingContext;
 				}
