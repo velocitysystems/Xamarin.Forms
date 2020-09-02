@@ -75,19 +75,8 @@ namespace Xamarin.Forms.Platform.iOS
 
 		public override UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath)
 		{
-			var cell = collectionView.DequeueReusableCell(DetermineCellReuseId(), indexPath) as UICollectionViewCell;
-
-			switch (cell)
-			{
-				case DefaultCell defaultCell:
-					UpdateDefaultCell(defaultCell, indexPath);
-					break;
-				case TemplatedCell templatedCell:
-					UpdateTemplatedCell(templatedCell, indexPath);
-					break;
-			}
-
-			return cell;
+			// When retrieving a non-prototype cell, we bind it to its data context.
+			return GetCell(collectionView, indexPath, true);
 		}
 
 		public override nint GetItemsCount(UICollectionView collectionView, nint section)
@@ -205,6 +194,23 @@ namespace Xamarin.Forms.Platform.iOS
 			return ItemsSource.GroupCount;
 		}
 
+		private UICollectionViewCell GetCell(UICollectionView collectionView, NSIndexPath indexPath, bool bind)
+		{
+			var cell = collectionView.DequeueReusableCell(DetermineCellReuseId(), indexPath) as UICollectionViewCell;
+
+			switch (cell)
+			{
+				case DefaultCell defaultCell:
+					UpdateDefaultCell(defaultCell, indexPath);
+					break;
+				case TemplatedCell templatedCell:
+					UpdateTemplatedCell(templatedCell, indexPath, bind);
+					break;
+			}
+
+			return cell;
+		}
+
 		protected virtual void UpdateDefaultCell(DefaultCell cell, NSIndexPath indexPath)
 		{
 			cell.Label.Text = ItemsSource[indexPath].ToString();
@@ -215,11 +221,11 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 		}
 
-		protected virtual void UpdateTemplatedCell(TemplatedCell cell, NSIndexPath indexPath)
+		protected virtual void UpdateTemplatedCell(TemplatedCell cell, NSIndexPath indexPath, bool bind)
 		{
 			cell.ContentSizeChanged -= CellContentSizeChanged;
 
-			cell.Bind(ItemsView.ItemTemplate, ItemsSource[indexPath], ItemsView);
+			cell.Bind(ItemsView.ItemTemplate, ItemsView, bind ? ItemsSource[indexPath] : default);
 
 			cell.ContentSizeChanged += CellContentSizeChanged;
 
@@ -283,7 +289,10 @@ namespace Xamarin.Forms.Platform.iOS
 
 			var indexPath = NSIndexPath.Create(group, 0);
 
-			return GetCell(CollectionView, indexPath);
+			// When retrieving a prototype cell, we *do not wish* to bind it to its data context.
+			// Why? This is for consistency with the behavior on the other platforms.
+			// Previously, this meant the first cell displayed was bound twice in error.
+			return GetCell(CollectionView, indexPath, false);
 		}
 
 		protected virtual void RegisterViewTypes()

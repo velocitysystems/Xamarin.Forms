@@ -106,7 +106,7 @@ namespace Xamarin.Forms.Platform.iOS
 
 			var bindingContext = ItemsSource.Group(indexPath);
 
-			cell.Bind(template, bindingContext, ItemsView);
+			cell.Bind(template, ItemsView, bindingContext);
 
 			if (cell is ItemsViewCell)
 			{
