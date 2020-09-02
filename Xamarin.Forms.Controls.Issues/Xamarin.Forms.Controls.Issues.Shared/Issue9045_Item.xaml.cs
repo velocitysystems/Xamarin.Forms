@@ -10,13 +10,14 @@ using Xamarin.Forms.Xaml;
 
 namespace Xamarin.Forms.Controls.Issues
 {
-    [XamlCompilation(XamlCompilationOptions.Compile)]
     public partial class Issue9045_Item : Grid
     {
         public Issue9045_Item()
         {
-            InitializeComponent();
-        }
+#if APP
+			InitializeComponent();
+#endif
+		}
 
 		protected override void OnBindingContextChanged()
 		{
